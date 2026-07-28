@@ -205,3 +205,44 @@ export const verifyOTP = async (data) => {
     }
 
 };
+
+export const login = async (data) => {
+
+    try {       
+
+        const { email, password } = data;
+
+        // Find user
+        const user = await authRepository.findUserByEmail(email);
+
+        if (!user) {
+            return {
+                success: false,
+                message: "Invalid email or password."
+            };
+        }
+
+        // Compare password
+        const isPasswordValid = await bcrypt.compare(password, user.password_hash);
+
+        if (!isPasswordValid) {
+            return {
+                success: false,
+                message: "Invalid email or password."
+            };
+        }
+
+
+        return {
+            success: true,
+            message: "Login successful.",
+            token
+        };
+    } catch (error) {
+        console.error("Login Error:", error);
+        return {
+            success: false,
+            message: "Failed to login."
+        };
+    }
+};

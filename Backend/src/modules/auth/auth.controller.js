@@ -15,6 +15,15 @@ export const registerCompany = async (req, res, next) => {
     }
 };
 
+export const login = async (req, res, next) => {
+    try {
+        const result = await authService.login(req.body);
+        res.json(result);
+    } catch (error) {
+        next(error);
+    }
+};
+
 export const verifyOTP = async (req, res) => {
 
     const result = await authService.verifyOTP(req.body);

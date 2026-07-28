@@ -16,7 +16,13 @@ export const findCompanyByEmail = async (email) => {
 export const findUserByEmail = async (email) => {
     const [rows] = await pool.execute(
         `
-        SELECT user_id, email
+        SELECT
+        user_id,
+        company_id,
+        name,
+        email,
+        password_hash,
+        role
         FROM users
         WHERE email = ?
         `,
