@@ -1,3 +1,4 @@
+
 import pool from "../../config/db.js";
 
 export const findCompanyByEmail = async (email) => {
@@ -100,36 +101,36 @@ export const findPendingRegistrationByEmail = async (email) => {
 export const createCompany = async (connection, companyData) => {
 
     const {
-        company_id,
+
         company_name,
         email,
         phone
     } = companyData;
 
-    await connection.execute(
-        `
-        INSERT INTO companies
-        (
-            company_id,
-            company_name,
-            email,
-            phone
-        )
-        VALUES (?, ?, ?, ?)
-        `,
-        [
-            company_id,
-            company_name,
-            email,
-            phone
-        ]
-    );
-};
+    const [result] = await connection.execute(
+    `
+    INSERT INTO companies
+    (
+        company_name,
+        email,
+        phone
+    )
+    VALUES (?, ?, ?)
+    `,
+    [
+        company_name,
+        email,
+        phone
+    ]
+);
+
+return result.insertId;
+}
 
 export const createUser = async (connection, userData) => {
 
     const {
-        user_id,
+      
         company_id,
         name,
         email,
@@ -141,7 +142,7 @@ export const createUser = async (connection, userData) => {
         `
         INSERT INTO users
         (
-            user_id,
+        
             company_id,
             name,
             email,
@@ -151,7 +152,7 @@ export const createUser = async (connection, userData) => {
         VALUES (?, ?, ?, ?, ?, ?)
         `,
         [
-            user_id,
+           
             company_id,
             name,
             email,
@@ -174,3 +175,166 @@ export const deletePendingRegistration = async (
         [pending_registration_id]
     );
 };
+
+export const updatePendingRegistration = async (data) => {
+    const {
+        pending_registration_id,
+        otp_code,
+        otp_expires_at,
+        failed_attempts,
+        otp_resend_count,
+        status
+    } = data;
+
+    await pool.execute(
+        `
+        UPDATE pending_registrations
+        SET
+            otp_code = ?,
+            otp_expires_at = ?,
+            failed_attempts = ?,
+            otp_resend_count = ?,
+            status = ?
+        WHERE pending_registration_id = ?
+        `,
+        [
+            otp_code,
+            otp_expires_at,
+            failed_attempts,
+            otp_resend_count,
+            status,
+            pending_registration_id
+        ]
+    );
+};
+
+export const findUserById = async (user_id) => {
+    const [rows] = await pool.execute(
+        `
+        SELECT
+            user_id,
+            company_id,
+            name,
+            email,
+            password_hash,
+            role
+        FROM users
+        WHERE user_id = ?
+        `,
+        [user_id]
+    );
+
+    return rows[0];
+};
+
+export const updatePendingRegistrationOTP = async (
+    email,
+    otp_code,
+    otp_expires_at
+) => {
+
+    await pool.execute(
+        `
+        UPDATE pending_registrations
+        SET
+            otp_code = ?,
+            otp_expires_at = ?
+        WHERE email = ?
+        `,
+        [
+            otp_code,
+            otp_expires_at,
+            email
+        ]
+    );
+
+};
+
+export const updateUserOTP = async (
+    email,
+    otp_code,
+    otp_expires_at
+) => {
+
+    await pool.execute(
+        `
+        UPDATE users
+        SET
+            otp_code = ?,
+            otp_expires_at = ?
+        WHERE email = ?
+        `,
+        [
+            otp_code,
+            otp_expires_at,
+            email
+        ]
+    );
+
+};
+
+export const updateUserPassword = async (
+    email,
+    password_hash
+) => {
+
+    await pool.execute(
+        `
+        UPDATE users
+        SET
+            password_hash = ?,
+            otp_code = NULL,
+            otp_expires_at = NULL
+        WHERE email = ?
+        `,
+        [
+            password_hash,
+            email
+        ]
+    );
+
+};
+
+export const updateUserPasswordById = async (
+    userId,
+    password_hash
+) => {
+
+    await pool.execute(
+        `
+        UPDATE users
+        SET
+            password_hash = ?
+        WHERE user_id = ?
+        `,
+        [
+            password_hash,
+            userId
+        ]
+    );
+
+};
+
+export const updateUserProfile = async (
+    userId,
+    name,
+    phone
+) => {
+
+    await pool.execute(
+        `
+        UPDATE users
+        SET
+            name = ?,
+            phone = ?
+        WHERE user_id = ?
+        `,
+        [
+            name,
+            phone,
+            userId
+        ]
+    );
+
+};
+

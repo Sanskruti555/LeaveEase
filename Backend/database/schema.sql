@@ -84,6 +84,10 @@ CREATE TABLE users (
 );
 
 ALTER TABLE users
+ADD COLUMN otp_code VARCHAR(6),
+ADD COLUMN otp_expires_at DATETIME;
+
+ALTER TABLE users
 ADD CONSTRAINT fk_users_company
 FOREIGN KEY (company_id)
 REFERENCES companies(company_id)
@@ -349,6 +353,9 @@ CREATE TABLE pending_registrations (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                ON UPDATE CURRENT_TIMESTAMP
 );
+
+ALTER TABLE pending_registrations
+RENAME COLUMN otp TO otp_code;
 
 ALTER TABLE imports
 ADD CONSTRAINT fk_imports_company
