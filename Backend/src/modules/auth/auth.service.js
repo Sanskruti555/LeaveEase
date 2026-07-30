@@ -147,18 +147,19 @@ export const verifyOTP = async (data) => {
 };
 
         // Super Admin object
-        const userData = {
-            name: pendingRegistration.admin_name,
-            email: pendingRegistration.email,
-            password_hash: pendingRegistration.password_hash,
-            role: "SUPER_ADMIN"
-        };
+       const userData = {
+    company_id,
+    name: pendingRegistration.admin_name,
+    email: pendingRegistration.email,
+    password_hash: pendingRegistration.password_hash,
+    role: "SUPER_ADMIN"
+};
 
         // Create company
-        await authRepository.createCompany(
-            connection,
-            companyData
-        );
+      const company_id = await authRepository.createCompany(
+    connection,
+    companyData
+);
 
         // Create super admin
         await authRepository.createUser(
