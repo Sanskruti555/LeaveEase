@@ -23,7 +23,9 @@ export const findUserByEmail = async (email) => {
         name,
         email,
         password_hash,
-        role
+        role,
+        otp_code,
+        otp_expires_at
         FROM users
         WHERE email = ?
         `,
@@ -149,7 +151,7 @@ export const createUser = async (connection, userData) => {
             password_hash,
             role
         )
-        VALUES (?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?)
         `,
         [
            
@@ -338,3 +340,11 @@ export const updateUserProfile = async (
 
 };
 
+export const findUserByPhone = async (phone) => {
+    const [rows] = await pool.query(
+        `SELECT * FROM users WHERE phone = ? LIMIT 1`,
+        [phone]
+    );
+
+    return rows[0] || null;
+};

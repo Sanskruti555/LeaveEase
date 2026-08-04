@@ -1,6 +1,8 @@
 import express from "express";
 import {registerCompany,login,verifyOTP,resendOTP,forgotPassword,resetPassword,changePassword,updateProfile,getProfile} from "./auth.controller.js";
+import {validateRegisterCompany,validateLogin} from "./auth.validation.js";
 
+import { authMiddleware } from "../../middleware/auth.middleware.js";
 const router = express.Router();
 
 router.post("/register-company", validateRegisterCompany, registerCompany);

@@ -64,7 +64,7 @@ export const resetPassword = async (req, res) => {
 }
 
 export const changePassword = async (req, res) => {
-    const result = await authService.changePassword(req.user.id, req.body);
+    const result = await authService.changePassword(req.user.user_id, req.body);
 
     if (result.success) {
         return res.status(200).json(result);
@@ -72,7 +72,38 @@ export const changePassword = async (req, res) => {
     return res.status(400).json(result);
 }
 
+export const updateProfile = async (req, res, next) => {
+    try {
+        const result = await authService.updateProfile(
+            req.user.user_id,
+            req.body
+        );
 
+        if (!result.success) {
+            return res.status(400).json(result);
+        }
+
+        return res.status(200).json(result);
+
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const getProfile = async (req, res, next) => {
+    try {
+        const result = await authService.getProfile(req.user.user_id);
+
+        if (!result.success) {
+            return res.status(404).json(result);
+        }
+
+        return res.status(200).json(result);
+
+    } catch (error) {
+        next(error);
+    }
+};
         
 
 

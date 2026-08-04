@@ -4,9 +4,9 @@ import { v4 as uuidv4 } from "uuid";
 import pool from "../../config/db.js";
 import * as authRepository from "./auth.repository.js";
 
-import { sendOTPEmail } from "../../utils/email.js";
-import { generateOTP} from "../../utils/otp.js";
-
+import { sendOTPEmail } from "../../utils/mail.js";
+import { generateOTP , getOTPExpiry} from "../../utils/otp.js";
+import { generateToken } from "../../utils/jwt.js";
 
 export const registerCompany = async (data) => {
 
@@ -141,25 +141,27 @@ export const verifyOTP = async (data) => {
 
         // Company object
        const companyData = {
-    company_name: pendingRegistration.company_name,
-    email: pendingRegistration.email,
-    phone: pendingRegistration.phone
-};
-
-        // Super Admin object
-       const userData = {
-    company_id,
-    name: pendingRegistration.admin_name,
-    email: pendingRegistration.email,
-    password_hash: pendingRegistration.password_hash,
-    role: "SUPER_ADMIN"
-};
+       company_name: pendingRegistration.company_name,
+       email: pendingRegistration.email,
+       phone: pendingRegistration.phone
+       };
 
         // Create company
       const company_id = await authRepository.createCompany(
-    connection,
-    companyData
-);
+      connection,
+      companyData
+     );
+
+        // Super Admin object
+       const userData = {
+       company_id,
+       name: pendingRegistration.admin_name,
+       email: pendingRegistration.email,
+       password_hash: pendingRegistration.password_hash,
+       role: "SUPER_ADMIN"
+      };
+
+       
 
         // Create super admin
         await authRepository.createUser(
@@ -355,6 +357,10 @@ export const resetPassword = async (data) => {
                 message: "User not found."
             };
         }
+
+        console.log("DB OTP:", user.otp_code, typeof user.otp_code);
+        console.log("BODY OTP:", otp, typeof otp);
+        
         // Verify OTP
         if (user.otp_code !== otp) {
             return {
