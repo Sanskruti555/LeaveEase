@@ -21,3 +21,28 @@ export const sendOTPEmail = async (email, otp) => {
     });
 
 };
+
+export const sendInvitationEmail = async (
+    email,
+    invitationToken,
+    role
+) => {
+
+    const invitationLink =
+    `${process.env.FRONTEND_URL}/accept-invitation/${invitationToken}`;
+
+    await transporter.sendMail({
+        from: process.env.EMAIL_USER,
+        to: email,
+        subject: "You're invited to LeaveEase",
+        text: `
+You have been invited to join LeaveEase as ${role}.
+
+Accept your invitation using the link below:
+
+${invitationLink}
+
+This invitation will expire in 24 hours.
+        `
+    });
+};
