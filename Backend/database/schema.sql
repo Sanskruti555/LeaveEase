@@ -20,12 +20,7 @@ CREATE TABLE companies (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
-ALTER TABLE companies
-ADD CONSTRAINT fk_company_owner
-FOREIGN KEY (owner_user_id)
-REFERENCES users(user_id)
-ON DELETE SET NULL
-ON UPDATE CASCADE;
+
 
 CREATE TABLE company_settings (
     company_id INT PRIMARY KEY,
@@ -86,6 +81,13 @@ CREATE TABLE users (
 ALTER TABLE users
 ADD COLUMN otp_code VARCHAR(6),
 ADD COLUMN otp_expires_at DATETIME;
+
+ALTER TABLE companies
+ADD CONSTRAINT fk_company_owner
+FOREIGN KEY (owner_user_id)
+REFERENCES users(user_id)
+ON DELETE SET NULL
+ON UPDATE CASCADE;
 
 ALTER TABLE users
 ADD CONSTRAINT fk_users_company

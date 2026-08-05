@@ -295,3 +295,36 @@ export const cancelInvitation = async (invitationId) => {
         [invitationId]
     );
 };
+
+export const findLeaveRequestsByEmployee = async (employeeId) => {
+
+    const [rows] = await pool.execute(
+        `
+        SELECT
+            lr.request_id,
+            lr.leave_type_id,
+            lt.name AS leave_type,
+            lr.start_date,
+            lr.end_date,
+            lr.duration_type,
+            lr.reason,
+            lr.status,
+            lr.approved_by,
+            lr.approved_at,
+            lr.rejection_reason,
+            lr.created_at,
+            lr.updated_at
+        FROM leave_requests lr
+
+        INNER JOIN leave_types lt
+            ON lr.leave_type_id = lt.leave_type_id
+
+        WHERE lr.employee_id = ?
+
+        ORDER BY lr.created_at DESC
+        `,
+        [employeeId]
+    );
+
+    return rows;
+};

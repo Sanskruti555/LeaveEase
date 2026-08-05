@@ -3,6 +3,7 @@ import cors from "cors";
 
 import authRoutes from "./modules/auth/auth.routes.js";
 import invitationRoutes from "./modules/invitations/invitation.routes.js";
+import leaveRoutes from "./modules/leave/leave.routes.js";
 
 const app = express();
 
@@ -14,5 +15,6 @@ app.use(express.json());
 
 app.use("/api/invitations", invitationRoutes);
 app.use("/api/auth", authRoutes);
+app.use("/api/leaves", leaveRoutes);
 
 export default app;
