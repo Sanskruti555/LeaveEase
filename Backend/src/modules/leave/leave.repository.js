@@ -253,3 +253,192 @@ export const rejectLeaveRequest = async (
     return result.affectedRows;
 };
 
+export const findLeaveBalance = async (
+    userId,
+    leaveTypeId,
+    date
+) => {
+
+    const [rows] = await pool.execute(
+        `
+        SELECT
+            balance_id,
+            user_id,
+            leave_type_id,
+            cycle_start_date,
+            cycle_end_date,
+            allocated_balance,
+            used_balance,
+            remaining_balance
+        FROM leave_balances
+        WHERE user_id = ?
+          AND leave_type_id = ?
+          AND ? BETWEEN cycle_start_date AND cycle_end_date
+        LIMIT 1
+        `,
+        [
+            userId,
+            leaveTypeId,
+            date
+        ]
+    );
+
+    return rows[0];
+};
+
+export const createLeaveBalance = async (data) => {
+
+    const {
+        user_id,
+        leave_type_id,
+        cycle_start_date,
+        cycle_end_date,
+        allocated_balance
+    } = data;
+
+    const [result] = await pool.execute(
+        `
+        INSERT INTO leave_balances (
+            user_id,
+            leave_type_id,
+            cycle_start_date,
+            cycle_end_date,
+            allocated_balance,
+            used_balance,
+            remaining_balance
+        )
+        VALUES (?, ?, ?, ?, ?, 0, ?)
+        `,
+        [
+            user_id,
+            leave_type_id,
+            cycle_start_date,
+            cycle_end_date,
+            allocated_balance,
+            allocated_balance
+        ]
+    );
+
+    return result.insertId;
+};
+
+export const approveLeaveWithBalance = async (
+    requestId,
+    managerId,
+    employeeId,
+    leaveTypeId,
+    requestDate,
+    requestedDays
+) => {
+
+    const connection = await pool.getConnection();
+
+    try {
+
+        await connection.beginTransaction();
+
+
+        // 1. Lock the employee's leave balance
+        const [balanceRows] = await connection.execute(
+            `
+            SELECT
+                balance_id,
+                allocated_balance,
+                used_balance,
+                remaining_balance
+            FROM leave_balances
+            WHERE user_id = ?
+              AND leave_type_id = ?
+              AND ? BETWEEN cycle_start_date AND cycle_end_date
+            LIMIT 1
+            FOR UPDATE
+            `,
+            [
+                employeeId,
+                leaveTypeId,
+                requestDate
+            ]
+        );
+
+
+        const balance = balanceRows[0];
+
+
+        if (!balance) {
+            throw new Error("Leave balance not found.");
+        }
+
+
+        // 2. Make sure balance is still sufficient
+        if (
+            Number(balance.remaining_balance) <
+            requestedDays
+        ) {
+            throw new Error("Insufficient leave balance.");
+        }
+
+
+        // 3. Approve the leave request
+        const [leaveResult] = await connection.execute(
+            `
+            UPDATE leave_requests
+            SET
+                status = 'APPROVED',
+                approved_by = ?,
+                approved_at = CURRENT_TIMESTAMP,
+                rejection_reason = NULL
+            WHERE request_id = ?
+              AND status = 'PENDING'
+            `,
+            [
+                managerId,
+                requestId
+            ]
+        );
+
+
+        if (leaveResult.affectedRows === 0) {
+            throw new Error(
+                "Leave request is no longer pending."
+            );
+        }
+
+
+        // 4. Deduct leave balance
+        await connection.execute(
+            `
+            UPDATE leave_balances
+            SET
+                used_balance =
+                    used_balance + ?,
+
+                remaining_balance =
+                    remaining_balance - ?
+
+            WHERE balance_id = ?
+            `,
+            [
+                requestedDays,
+                requestedDays,
+                balance.balance_id
+            ]
+        );
+
+
+        // Everything succeeded
+        await connection.commit();
+
+        return true;
+
+
+    } catch (error) {
+
+        await connection.rollback();
+
+        throw error;
+
+    } finally {
+
+        connection.release();
+    }
+};

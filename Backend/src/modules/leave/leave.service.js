@@ -1,6 +1,80 @@
 import * as leaveRepository from "./leave.repository.js";
 
 
+const getOrCreateLeaveBalance = async (
+    userId,
+    leaveType,
+    requestDate
+) => {
+
+    let balance =
+        await leaveRepository.findLeaveBalance(
+            userId,
+            leaveType.leave_type_id,
+            requestDate
+        );
+
+    if (!balance) {
+
+        const year =
+            new Date(requestDate).getFullYear();
+
+        const cycleStartDate =
+            `${year}-01-01`;
+
+        const cycleEndDate =
+            `${year}-12-31`;
+
+        await leaveRepository.createLeaveBalance({
+            user_id: userId,
+            leave_type_id: leaveType.leave_type_id,
+            cycle_start_date: cycleStartDate,
+            cycle_end_date: cycleEndDate,
+            allocated_balance:
+                leaveType.leave_allocation
+        });
+
+        balance =
+            await leaveRepository.findLeaveBalance(
+                userId,
+                leaveType.leave_type_id,
+                requestDate
+            );
+    }
+
+    return balance;
+};
+
+const calculateLeaveDays = (
+    startDate,
+    endDate,
+    durationType
+) => {
+
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+
+    // HALF_DAY must be for a single date
+    if (durationType === "HALF_DAY") {
+
+        if (start.toDateString() !== end.toDateString()) {
+            return null;
+        }
+
+        return 0.5;
+    }
+
+    const millisecondsPerDay =
+        1000 * 60 * 60 * 24;
+
+    const difference =
+        end.getTime() - start.getTime();
+
+    return (
+        Math.floor(difference / millisecondsPerDay) + 1
+    );
+};
+
 export const applyLeave = async (user, data) => {
 
     try {
@@ -55,7 +129,7 @@ export const applyLeave = async (user, data) => {
         }
 
 
-        // Extra date safety check
+        // Date safety check
         const startDate = new Date(start_date);
         const endDate = new Date(end_date);
 
@@ -63,6 +137,72 @@ export const applyLeave = async (user, data) => {
             return {
                 success: false,
                 message: "End date cannot be before start date."
+            };
+        }
+
+
+        // Don't allow a leave request to cross balance cycles/years
+        if (
+            startDate.getFullYear() !==
+            endDate.getFullYear()
+        ) {
+            return {
+                success: false,
+                message: "Leave request cannot span multiple years."
+            };
+        }
+
+
+        // Calculate requested leave days
+        const requestedDays =
+            calculateLeaveDays(
+                start_date,
+                end_date,
+                duration_type
+            );
+
+
+        // HALF_DAY must be on a single date
+        if (requestedDays === null) {
+            return {
+                success: false,
+                message: "Half-day leave can only be applied for a single date."
+            };
+        }
+
+
+        // Find existing balance or initialize one
+        const balance =
+            await getOrCreateLeaveBalance(
+                user_id,
+                leaveType,
+                start_date
+            );
+
+
+        if (!balance) {
+            return {
+                success: false,
+                message: "Unable to initialize leave balance."
+            };
+        }
+
+
+        // Our real DB already stores remaining balance
+        const availableBalance =
+            Number(balance.remaining_balance);
+
+
+        // Check whether employee has enough leave
+        if (requestedDays > availableBalance) {
+
+            return {
+                success: false,
+                message: "Insufficient leave balance.",
+                data: {
+                    requested_days: requestedDays,
+                    available_balance: availableBalance
+                }
             };
         }
 
@@ -85,6 +225,7 @@ export const applyLeave = async (user, data) => {
             message: "Leave request submitted successfully.",
             data: {
                 request_id: requestId,
+                requested_days: requestedDays,
                 status: "PENDING"
             }
         };
@@ -212,8 +353,7 @@ export const approveLeave = async (user, requestId) => {
         }
 
 
-        // Find request and verify that employee
-        // actually belongs to this manager
+        // Find request and verify employee belongs to manager
         const leaveRequest =
             await leaveRepository.findLeaveRequestForManager(
                 requestId,
@@ -225,7 +365,8 @@ export const approveLeave = async (user, requestId) => {
         if (!leaveRequest) {
             return {
                 success: false,
-                message: "Leave request not found or you are not authorized to approve it."
+                message:
+                    "Leave request not found or you are not authorized to approve it."
             };
         }
 
@@ -234,29 +375,47 @@ export const approveLeave = async (user, requestId) => {
         if (leaveRequest.status !== "PENDING") {
             return {
                 success: false,
-                message: `Leave request is already ${leaveRequest.status.toLowerCase()}.`
+                message:
+                    `Leave request is already ${leaveRequest.status.toLowerCase()}.`
             };
         }
 
 
-        const affectedRows =
-            await leaveRepository.approveLeaveRequest(
-                requestId,
-                user_id
+        // Calculate how many leave days must be deducted
+        const requestedDays =
+            calculateLeaveDays(
+                leaveRequest.start_date,
+                leaveRequest.end_date,
+                leaveRequest.duration_type
             );
 
 
-        if (affectedRows === 0) {
+        if (requestedDays === null) {
             return {
                 success: false,
-                message: "Leave request could not be approved."
+                message: "Invalid leave duration."
             };
         }
+
+
+        // Approve request + deduct balance in ONE transaction
+        await leaveRepository.approveLeaveWithBalance(
+            requestId,
+            user_id,
+            leaveRequest.employee_id,
+            leaveRequest.leave_type_id,
+            leaveRequest.start_date,
+            requestedDays
+        );
 
 
         return {
             success: true,
-            message: "Leave request approved successfully."
+            message: "Leave request approved successfully.",
+            data: {
+                request_id: Number(requestId),
+                deducted_days: requestedDays
+            }
         };
 
 
@@ -267,13 +426,40 @@ export const approveLeave = async (user, requestId) => {
             error
         );
 
+
+        if (error.message === "Insufficient leave balance.") {
+            return {
+                success: false,
+                message: "Insufficient leave balance."
+            };
+        }
+
+
+        if (
+            error.message ===
+            "Leave request is no longer pending."
+        ) {
+            return {
+                success: false,
+                message: "Leave request is no longer pending."
+            };
+        }
+
+
+        if (error.message === "Leave balance not found.") {
+            return {
+                success: false,
+                message: "Leave balance not found."
+            };
+        }
+
+
         return {
             success: false,
             message: "Failed to approve leave request."
         };
     }
 };
-
 export const rejectLeave = async (
     user,
     requestId,
@@ -375,3 +561,4 @@ export const rejectLeave = async (
         };
     }
 };
+
