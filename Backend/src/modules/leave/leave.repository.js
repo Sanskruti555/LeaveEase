@@ -442,3 +442,104 @@ export const approveLeaveWithBalance = async (
         connection.release();
     }
 };
+
+export const findLeaveBalancesByUser = async (userId) => {
+
+    const [rows] = await pool.execute(
+        `
+        SELECT
+            lb.balance_id,
+
+            lt.leave_type_id,
+            lt.name AS leave_type,
+
+            lb.cycle_start_date,
+            lb.cycle_end_date,
+
+            lb.allocated_balance,
+            lb.used_balance,
+            lb.remaining_balance
+
+        FROM leave_balances lb
+
+        INNER JOIN leave_types lt
+            ON lb.leave_type_id = lt.leave_type_id
+
+        WHERE lb.user_id = ?
+
+        ORDER BY lt.name
+        `,
+        [userId]
+    );
+
+    return rows;
+};
+
+export const findOverlappingLeave = async (
+    employeeId,
+    startDate,
+    endDate
+) => {
+
+    const [rows] = await pool.execute(
+        `
+        SELECT
+            request_id,
+            start_date,
+            end_date,
+            status
+        FROM leave_requests
+        WHERE employee_id = ?
+          AND status IN ('PENDING', 'APPROVED')
+          AND start_date <= ?
+          AND end_date >= ?
+        LIMIT 1
+        `,
+        [
+            employeeId,
+            endDate,
+            startDate
+        ]
+    );
+
+    return rows[0];
+};
+
+export const findLeaveRequestByEmployee = async (
+    requestId,
+    employeeId
+) => {
+
+    const [rows] = await pool.execute(
+        `
+        SELECT
+            request_id,
+            employee_id,
+            status
+        FROM leave_requests
+        WHERE request_id = ?
+          AND employee_id = ?
+        LIMIT 1
+        `,
+        [
+            requestId,
+            employeeId
+        ]
+    );
+
+    return rows[0];
+};
+
+export const cancelLeaveRequest = async (
+    requestId
+) => {
+
+    await pool.execute(
+        `
+        UPDATE leave_requests
+        SET status = 'CANCELLED'
+        WHERE request_id = ?
+        `,
+        [requestId]
+    );
+};

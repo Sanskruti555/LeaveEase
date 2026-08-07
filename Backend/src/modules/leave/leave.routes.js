@@ -1,7 +1,7 @@
 import express from "express";
 
 import {
-    applyLeave , getMyLeaves ,   getTeamLeaves ,  rejectLeave , approveLeave
+    applyLeave , getMyLeaves ,   getTeamLeaves ,  rejectLeave , approveLeave ,getLeaveBalances ,cancelLeave
 } from "./leave.controller.js";
 
 import {
@@ -46,6 +46,18 @@ router.patch(
     authMiddleware,
     validateRejectLeave,
     rejectLeave
+);
+
+router.get(
+    "/balances",
+    authMiddleware,
+    getLeaveBalances
+);
+
+router.patch(
+    "/:requestId/cancel",
+    authMiddleware,
+    cancelLeave
 );
 
 export default router;

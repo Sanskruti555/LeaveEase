@@ -206,6 +206,20 @@ export const applyLeave = async (user, data) => {
             };
         }
 
+        const overlappingLeave =
+    await leaveRepository.findOverlappingLeave(
+        user_id,
+        start_date,
+        end_date
+    );
+
+if (overlappingLeave) {
+    return {
+        success: false,
+        message:
+            "You already have a leave request for the selected dates."
+    };
+}
 
         // Create leave request
         const requestId =
@@ -562,3 +576,117 @@ export const rejectLeave = async (
     }
 };
 
+export const getLeaveBalances = async (user) => {
+
+    try {
+
+        const {
+            user_id,
+            role
+        } = user;
+
+
+        if (role !== "EMPLOYEE") {
+            return {
+                success: false,
+                message: "Only employees can view leave balances."
+            };
+        }
+
+
+        const balances =
+            await leaveRepository.findLeaveBalancesByUser(
+                user_id
+            );
+
+
+        return {
+            success: true,
+            data: balances
+        };
+
+    } catch (error) {
+
+        console.error(
+            "Get Leave Balances Error:",
+            error
+        );
+
+        return {
+            success: false,
+            message: "Failed to fetch leave balances."
+        };
+    }
+};
+
+export const cancelLeave = async (
+    user,
+    requestId
+) => {
+
+    try {
+
+        const {
+            user_id,
+            role
+        } = user;
+
+
+        // Only employees can cancel leave
+        if (role !== "EMPLOYEE") {
+            return {
+                success: false,
+                message: "Only employees can cancel leave requests."
+            };
+        }
+
+
+        // Find employee's own leave request
+        const leaveRequest =
+            await leaveRepository.findLeaveRequestByEmployee(
+                requestId,
+                user_id
+            );
+
+
+        if (!leaveRequest) {
+            return {
+                success: false,
+                message: "Leave request not found."
+            };
+        }
+
+
+        // Only pending leave can be cancelled
+        if (leaveRequest.status !== "PENDING") {
+            return {
+                success: false,
+                message: `Only pending leave requests can be cancelled. Current status is ${leaveRequest.status}.`
+            };
+        }
+
+
+        // Cancel leave
+        await leaveRepository.cancelLeaveRequest(
+            requestId
+        );
+
+
+        return {
+            success: true,
+            message: "Leave request cancelled successfully."
+        };
+
+    } catch (error) {
+
+        console.error(
+            "Cancel Leave Error:",
+            error
+        );
+
+        return {
+            success: false,
+            message: "Failed to cancel leave request."
+        };
+    }
+};

@@ -71,3 +71,34 @@ export const rejectLeave = async (req, res) => {
 
     return res.status(400).json(result);
 };
+
+export const getLeaveBalances = async (req, res) => {
+
+    const result =
+        await leaveService.getLeaveBalances(
+            req.user
+        );
+
+    if (result.success) {
+        return res.status(200).json(result);
+    }
+
+    return res.status(400).json(result);
+};
+
+export const cancelLeave = async (req, res) => {
+
+    const { requestId } = req.params;
+
+    const result =
+        await leaveService.cancelLeave(
+            req.user,
+            requestId
+        );
+
+    if (result.success) {
+        return res.status(200).json(result);
+    }
+
+    return res.status(400).json(result);
+};
