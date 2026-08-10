@@ -1,4 +1,8 @@
 import * as leaveRepository from "./leave.repository.js";
+import * as notificationService
+    from "../notifications/notification.service.js";
+import * as auditLogService
+    from "../auditLogs/auditLog.service.js";
 
 
 const getOrCreateLeaveBalance = async (
@@ -233,6 +237,29 @@ if (overlappingLeave) {
                 attachment_path: null
             });
 
+          const employeeManager =
+    await leaveRepository.findManagerByEmployeeId(
+        user_id,
+        company_id
+    );
+
+if (employeeManager?.manager_id) {
+
+    const notificationResult =
+        await notificationService.createNotification({
+            company_id,
+            user_id: employeeManager.manager_id,
+            notification_type: "LEAVE_APPLIED",
+            entity_type: "LEAVE_REQUEST",
+            entity_id: requestId
+        });
+
+    if (!notificationResult.success) {
+        console.error(
+            "Failed to create leave application notification."
+        );
+    }
+}
 
         return {
             success: true,
@@ -422,6 +449,46 @@ export const approveLeave = async (user, requestId) => {
             requestedDays
         );
 
+        const auditResult =
+    await auditLogService.createAuditLog({
+        company_id,
+        user_id,
+        action: "UPDATE",
+        entity_type: "LEAVE_REQUEST",
+        entity_id: Number(requestId),
+
+        old_value: {
+            status: "PENDING"
+        },
+
+        new_value: {
+            status: "APPROVED"
+        },
+
+        ip_address: null,
+        user_agent: null
+    });
+
+if (!auditResult.success) {
+    console.error(
+        "Failed to create leave approval audit log."
+    );
+}
+
+        const notificationResult =
+    await notificationService.createNotification({
+        company_id,
+        user_id: leaveRequest.employee_id,
+        notification_type: "LEAVE_APPROVED",
+        entity_type: "LEAVE_REQUEST",
+        entity_id: Number(requestId)
+    });
+
+if (!notificationResult.success) {
+    console.error(
+        "Failed to create leave approval notification."
+    );
+}
 
         return {
             success: true,
@@ -555,6 +622,47 @@ export const rejectLeave = async (
             };
         }
 
+        const auditResult =
+    await auditLogService.createAuditLog({
+        company_id,
+        user_id,
+        action: "UPDATE",
+        entity_type: "LEAVE_REQUEST",
+        entity_id: Number(requestId),
+
+        old_value: {
+            status: "PENDING"
+        },
+
+        new_value: {
+            status: "REJECTED",
+            rejection_reason: rejection_reason.trim()
+        },
+
+        ip_address: null,
+        user_agent: null
+    });
+
+if (!auditResult.success) {
+    console.error(
+        "Failed to create leave rejection audit log."
+    );
+}
+
+        const notificationResult =
+    await notificationService.createNotification({
+        company_id,
+        user_id: leaveRequest.employee_id,
+        notification_type: "LEAVE_REJECTED",
+        entity_type: "LEAVE_REQUEST",
+        entity_id: Number(requestId)
+    });
+
+if (!notificationResult.success) {
+    console.error(
+        "Failed to create leave rejection notification."
+    );
+}
 
         return {
             success: true,
@@ -628,6 +736,7 @@ export const cancelLeave = async (
 
         const {
             user_id,
+            company_id,
             role
         } = user;
 
@@ -670,6 +779,59 @@ export const cancelLeave = async (
         await leaveRepository.cancelLeaveRequest(
             requestId
         );
+
+        const auditResult =
+    await auditLogService.createAuditLog({
+        company_id,
+        user_id,
+        action: "UPDATE",
+        entity_type: "LEAVE_REQUEST",
+        entity_id: Number(requestId),
+
+        old_value: {
+            status: "PENDING"
+        },
+
+        new_value: {
+            status: "CANCELLED"
+        },
+
+        ip_address: null,
+        user_agent: null
+    });
+
+if (!auditResult.success) {
+    console.error(
+        "Failed to create leave cancellation audit log."
+    );
+}
+
+        // Find employee's manager
+const employeeManager =
+    await leaveRepository.findManagerByEmployeeId(
+        user_id,
+        company_id
+    );
+
+if (employeeManager?.manager_id) {
+
+    const notificationResult =
+        await notificationService.createNotification({
+            company_id,
+            user_id: employeeManager.manager_id,
+            notification_type: "LEAVE_CANCELLED",
+            entity_type: "LEAVE_REQUEST",
+            entity_id: Number(requestId)
+        });
+
+    if (!notificationResult.success) {
+        console.error(
+            "Failed to create leave cancellation notification."
+        );
+    }
+}
+
+
 
 
         return {

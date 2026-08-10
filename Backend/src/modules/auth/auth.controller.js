@@ -105,5 +105,32 @@ export const getProfile = async (req, res, next) => {
     }
 };
         
+export const logout = async (req, res) => {
+
+     try {
+
+        const result =
+            await authService.logout(req.user);
+
+        if (!result.success) {
+            return res.status(400).json(result);
+        }
+
+        res.clearCookie("token");
+
+        return res.status(200).json(result);
+
+    } catch (error) {
+
+        console.error(
+            "Logout Controller Error:",
+            error
+        );
 
 
+        return res.status(500).json({
+            success: false,
+            message: "Failed to logout."
+        });
+    }
+};

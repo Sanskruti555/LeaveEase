@@ -7,6 +7,8 @@ import * as authRepository from "./auth.repository.js";
 import { sendOTPEmail } from "../../utils/mail.js";
 import { generateOTP , getOTPExpiry} from "../../utils/otp.js";
 import { generateToken } from "../../utils/jwt.js";
+import * as auditLogService
+    from "../auditLogs/auditLog.service.js";
 
 export const registerCompany = async (data) => {
 
@@ -231,6 +233,31 @@ export const login = async (data) => {
                 message: "Invalid email or password."
             };
         }
+
+        const auditResult =
+    await auditLogService.createAuditLog({
+        company_id: user.company_id,
+        user_id: user.user_id,
+        action: "LOGIN",
+        entity_type: "USER",
+        entity_id: user.user_id,
+
+        old_value: null,
+
+        new_value: {
+            email: user.email,
+            role: user.role
+        },
+
+        ip_address: null,
+        user_agent: null
+    });
+
+if (!auditResult.success) {
+    console.error(
+        "Failed to create login audit log."
+    );
+}
        
         const token = generateToken({
             user_id: user.user_id,
@@ -524,4 +551,56 @@ export const getProfile = async (userId) => {
 };
 
   
+export const logout = async (user) => {
+
+    try {
+
+        const {
+            user_id,
+            company_id
+        } = user;
+
+
+        const auditResult =
+            await auditLogService.createAuditLog({
+                company_id,
+                user_id,
+                action: "LOGOUT",
+                entity_type: "USER",
+                entity_id: user_id,
+
+                old_value: null,
+
+                new_value: null,
+
+                ip_address: null,
+                user_agent: null
+            });
+
+
+        if (!auditResult.success) {
+            console.error(
+                "Failed to create logout audit log."
+            );
+        }
+
+
+        return {
+            success: true,
+            message: "Logged out successfully."
+        };
+
+    } catch (error) {
+
+        console.error(
+            "Logout Error:",
+            error
+        );
+
+        return {
+            success: false,
+            message: "Failed to logout."
+        };
+    }
+};
 

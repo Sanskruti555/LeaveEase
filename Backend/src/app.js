@@ -5,6 +5,7 @@ import authRoutes from "./modules/auth/auth.routes.js";
 import invitationRoutes from "./modules/invitations/invitation.routes.js";
 import leaveRoutes from "./modules/leave/leave.routes.js";
 import leaveTypeRoutes from "./modules/leaveTypes/leaveType.routes.js";
+import notificationRoutes from "./modules/notifications/notification.routes.js";
 
 const app = express();
 
@@ -20,6 +21,11 @@ app.use("/api/leaves", leaveRoutes);
 app.use(
     "/api/leave-types",
     leaveTypeRoutes
+);
+
+app.use(
+    "/api/notifications",
+    notificationRoutes
 );
 
 export default app;

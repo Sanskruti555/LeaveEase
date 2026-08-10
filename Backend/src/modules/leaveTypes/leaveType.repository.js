@@ -87,3 +87,92 @@ export const findLeaveTypesByCompany = async (
 
     return rows;
 };
+
+export const findLeaveTypeById = async (
+    leaveTypeId,
+    companyId
+) => {
+
+    const [rows] = await pool.execute(
+        `
+        SELECT
+            leave_type_id,
+            company_id,
+            name,
+            description,
+            leave_allocation,
+            allocation_frequency,
+            status
+        FROM leave_types
+        WHERE leave_type_id = ?
+          AND company_id = ?
+        LIMIT 1
+        `,
+        [
+            leaveTypeId,
+            companyId
+        ]
+    );
+
+    return rows[0];
+};
+
+export const updateLeaveType = async (
+    leaveTypeId,
+    companyId,
+    data
+) => {
+
+    const {
+        name,
+        description,
+        leave_allocation,
+        allocation_frequency
+    } = data;
+
+    const [result] = await pool.execute(
+        `
+        UPDATE leave_types
+        SET
+            name = ?,
+            description = ?,
+            leave_allocation = ?,
+            allocation_frequency = ?
+        WHERE leave_type_id = ?
+          AND company_id = ?
+        `,
+        [
+            name,
+            description,
+            leave_allocation,
+            allocation_frequency,
+            leaveTypeId,
+            companyId
+        ]
+    );
+
+    return result.affectedRows;
+};
+
+export const updateLeaveTypeStatus = async (
+    leaveTypeId,
+    companyId,
+    status
+) => {
+
+    const [result] = await pool.execute(
+        `
+        UPDATE leave_types
+        SET status = ?
+        WHERE leave_type_id = ?
+          AND company_id = ?
+        `,
+        [
+            status,
+            leaveTypeId,
+            companyId
+        ]
+    );
+
+    return result.affectedRows;
+};

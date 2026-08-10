@@ -543,3 +543,52 @@ export const cancelLeaveRequest = async (
         [requestId]
     );
 };
+
+export const findManagerByEmployeeId = async (
+    employeeId,
+    companyId
+) => {
+
+    const [rows] = await pool.execute(
+        `
+        SELECT
+            manager_id
+        FROM users
+        WHERE user_id = ?
+          AND company_id = ?
+          AND role = 'EMPLOYEE'
+        LIMIT 1
+        `,
+        [
+            employeeId,
+            companyId
+        ]
+    );
+
+    return rows[0];
+};
+
+export const findEmployeeByLeaveRequestId = async (
+    requestId,
+    companyId
+) => {
+
+    const [rows] = await pool.execute(
+        `
+        SELECT
+            l.employee_id
+        FROM leaves l
+        INNER JOIN users u
+            ON l.employee_id = u.user_id
+        WHERE l.request_id = ?
+          AND u.company_id = ?
+        LIMIT 1
+        `,
+        [
+            requestId,
+            companyId
+        ]
+    );
+
+    return rows[0];
+};

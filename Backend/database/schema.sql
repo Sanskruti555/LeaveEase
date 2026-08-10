@@ -20,7 +20,12 @@ CREATE TABLE companies (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
-
+ALTER TABLE companies
+ADD CONSTRAINT fk_company_owner
+FOREIGN KEY (owner_user_id)
+REFERENCES users(user_id)
+ON DELETE SET NULL
+ON UPDATE CASCADE;
 
 CREATE TABLE company_settings (
     company_id INT PRIMARY KEY,
@@ -81,13 +86,6 @@ CREATE TABLE users (
 ALTER TABLE users
 ADD COLUMN otp_code VARCHAR(6),
 ADD COLUMN otp_expires_at DATETIME;
-
-ALTER TABLE companies
-ADD CONSTRAINT fk_company_owner
-FOREIGN KEY (owner_user_id)
-REFERENCES users(user_id)
-ON DELETE SET NULL
-ON UPDATE CASCADE;
 
 ALTER TABLE users
 ADD CONSTRAINT fk_users_company
@@ -362,7 +360,7 @@ RENAME COLUMN otp TO otp_code;
 ALTER TABLE imports
 ADD CONSTRAINT fk_imports_company
 FOREIGN KEY (company_id)
-REFERENCES companies(company_id)
+REFERENCES companies(company_id),
 ON DELETE RESTRICT
 ON UPDATE CASCADE;
 
@@ -376,9 +374,193 @@ ON UPDATE CASCADE;
 //SELECT DATABASE();
 
 //SHOW TABLES;
-
+SELECT * FROM users;
 //DESCRIBE companies;
 
+DELETE FROM pending_registrations
+WHERE email = 'sanskruti.test@gmail.com';
 
+SELECT * FROM pending_registrations;
+SELECT * FROM branches;
 
+INSERT INTO branches (
+    company_id,
+    name,
+    email,
+    phone,
+    address,
+    city,
+    state,
+    country
+)
+VALUES (
+	'3',
+    'Pune Branch',
+    'pune.branch@test.com',
+    '9876543210',
+    'Baner',
+    'Pune',
+    'Maharashtra',
+    'India'
+);
 
+SELECT * FROM invitations;
+
+DELETE FROM invitations
+WHERE invitation_id = 5;
+
+SELECT * FROM leave_types;
+
+SELECT
+    company_id,
+    company_name,
+    status
+FROM companies;
+
+SELECT
+    user_id,
+    name,
+    email,
+    company_id,
+    branch_id,
+    manager_id,
+    role,
+    status
+FROM users;
+
+INSERT INTO leave_types (
+    company_id,
+    name,
+    description,
+    leave_allocation,
+    allocation_frequency,
+    is_paid,
+    requires_attachment,
+    manager_approval_required,
+    carry_forward_allowed,
+    max_carry_forward_days,
+    status,
+    created_by
+)
+VALUES (
+    3,
+    'Casual Leave',
+    'Leave for personal or casual purposes',
+    12.00,
+    'YEARLY',
+    TRUE,
+    FALSE,
+    TRUE,
+    FALSE,
+    0,
+    'ACTIVE',
+    1
+);
+
+SELECT
+    leave_type_id,
+    company_id,
+    name,
+    status
+FROM leave_types;
+
+SELECT * FROM leave_requests;
+
+SELECT
+    request_id,
+    employee_id,
+    status,
+    approved_by,
+    approved_at,
+    rejection_reason
+FROM leave_requests
+WHERE request_id = 1;
+
+SELECT
+    request_id,
+    employee_id,
+    status,
+    approved_by,
+    approved_at,
+    rejection_reason
+FROM leave_requests;
+
+SELECT
+    user_id,
+    name,
+    email,
+    company_id,
+    branch_id,
+    manager_id,
+    role
+FROM users
+WHERE role = 'MANAGER';
+SELECT *
+FROM leave_balances;
+
+SHOW CREATE TABLE leave_balances;
+
+SELECT
+    request_id,
+    employee_id,
+    leave_type_id,
+    start_date,
+    end_date,
+    status
+FROM leave_requests
+ORDER BY request_id DESC;
+
+SELECT
+    balance_id,
+    user_id,
+    leave_type_id,
+    allocated_balance,
+    used_balance,
+    remaining_balance
+FROM leave_balances
+WHERE user_id = 4
+  AND leave_type_id = 1;
+  
+  SELECT
+    request_id,
+    employee_id,
+    status,
+    approved_by,
+    approved_at
+FROM leave_requests
+WHERE request_id = 3;
+
+SELECT
+    request_id,
+    status,
+    start_date,
+    end_date
+FROM leave_requests
+ORDER BY request_id;
+
+SELECT
+    request_id,
+    status
+FROM leave_requests
+WHERE request_id = 4;
+
+SELECT
+    leave_type_id,
+    name,
+    description,
+    leave_allocation,
+    allocation_frequency,
+    status
+FROM leave_types
+WHERE leave_type_id = 2;
+
+SELECT
+    leave_type_id,
+    name,
+    status
+FROM leave_types
+WHERE leave_type_id = 2;
+
+SELECT *
+FROM notifications
+ORDER BY notification_id DESC;

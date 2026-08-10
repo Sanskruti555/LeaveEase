@@ -1,7 +1,17 @@
 import express from "express";
-import {registerCompany,login,verifyOTP,resendOTP,forgotPassword,resetPassword,changePassword,updateProfile,getProfile} from "./auth.controller.js";
 import {validateRegisterCompany,validateLogin} from "./auth.validation.js";
-
+import {
+    registerCompany,
+    login,
+    logout,
+    verifyOTP,
+    resendOTP,
+    forgotPassword,
+    resetPassword,
+    changePassword,
+    updateProfile,
+    getProfile
+} from "./auth.controller.js";
 import { authMiddleware } from "../../middleware/auth.middleware.js";
 const router = express.Router();
 
@@ -9,10 +19,7 @@ router.post("/register-company", validateRegisterCompany, registerCompany);
 
 router.post("/login",validateLogin,login);
 
-router.post("/logout", (req, res) => {
-    res.clearCookie("token");
-    res.status(200).json({ message: "Logged out successfully." });
-});
+router.post( "/logout", authMiddleware, logout);
 
 router.post("/verify-otp", verifyOTP);
 router.post("/resend-otp", resendOTP);
