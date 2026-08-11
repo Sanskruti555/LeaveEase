@@ -103,6 +103,7 @@ export const findBranchById = async (branchId) => {
         SELECT
             branch_id,
             company_id,
+            branch_admin_id
             name,
             status
         FROM branches
@@ -296,3 +297,24 @@ export const cancelInvitation = async (invitationId) => {
     );
 };
 
+export const assignBranchAdmin = async (
+    connection,
+    branchId,
+    userId
+) => {
+
+    const [result] = await connection.execute(
+        `
+        UPDATE branches
+        SET branch_admin_id = ?
+        WHERE branch_id = ?
+          AND branch_admin_id IS NULL
+        `,
+        [
+            userId,
+            branchId
+        ]
+    );
+
+    return result.affectedRows > 0;
+};

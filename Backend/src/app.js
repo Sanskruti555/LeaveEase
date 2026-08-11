@@ -6,6 +6,7 @@ import invitationRoutes from "./modules/invitations/invitation.routes.js";
 import leaveRoutes from "./modules/leave/leave.routes.js";
 import leaveTypeRoutes from "./modules/leaveTypes/leaveType.routes.js";
 import notificationRoutes from "./modules/notifications/notification.routes.js";
+import branchRoutes from "./modules/branch/branch.routes.js";
 
 const app = express();
 
@@ -26,6 +27,10 @@ app.use(
 app.use(
     "/api/notifications",
     notificationRoutes
+);
+app.use(
+    "/api/branches",
+    branchRoutes
 );
 
 export default app;

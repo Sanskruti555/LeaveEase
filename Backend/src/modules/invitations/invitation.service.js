@@ -401,6 +401,24 @@ export const acceptInvitation = async (token, data) => {
                 userData
             );
 
+            // Assign Branch Admin to the branch
+if (invitation.role === "BRANCH_ADMIN") {
+
+    const assigned =
+        await invitationRepository.assignBranchAdmin(
+            connection,
+            invitation.branch_id,
+            user_id
+        );
+
+    if (!assigned) {
+
+        throw new Error(
+            "Branch already has a Branch Admin or branch not found."
+        );
+    }
+}
+
         // Mark invitation as accepted
         await invitationRepository.markInvitationAccepted(
             connection,
