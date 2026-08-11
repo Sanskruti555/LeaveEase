@@ -260,10 +260,12 @@ if (!auditResult.success) {
 }
        
         const token = generateToken({
-            user_id: user.user_id,
-            company_id: user.company_id,
-            role: user.role
-        });
+    user_id: user.user_id,
+    company_id: user.company_id,
+    branch_id: user.branch_id,
+    manager_id: user.manager_id,
+    role: user.role
+});
 
         return {
             success: true,

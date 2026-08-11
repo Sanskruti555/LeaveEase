@@ -15,17 +15,19 @@ export const findCompanyByEmail = async (email) => {
 };
 
 export const findUserByEmail = async (email) => {
+
     const [rows] = await pool.execute(
         `
         SELECT
-        user_id,
-        company_id,
-        name,
-        email,
-        password_hash,
-        role,
-        otp_code,
-        otp_expires_at
+            user_id,
+            company_id,
+            branch_id,
+            manager_id,
+            name,
+            email,
+            role,
+            status,
+            password_hash
         FROM users
         WHERE email = ?
         `,
@@ -33,7 +35,6 @@ export const findUserByEmail = async (email) => {
     );
 
     return rows[0];
-
 };
 
 export const createPendingRegistration = async (data) => {

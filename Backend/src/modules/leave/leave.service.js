@@ -18,33 +18,85 @@ const getOrCreateLeaveBalance = async (
             requestDate
         );
 
-    if (!balance) {
+   if (!balance) {
 
-        const year =
-            new Date(requestDate).getFullYear();
+    const date = new Date(requestDate);
 
-        const cycleStartDate =
+    let cycleStartDate;
+    let cycleEndDate;
+
+    if (
+        leaveType.allocation_frequency === "YEARLY"
+    ) {
+
+        const year = date.getFullYear();
+
+        cycleStartDate =
             `${year}-01-01`;
 
-        const cycleEndDate =
+        cycleEndDate =
             `${year}-12-31`;
 
-        await leaveRepository.createLeaveBalance({
-            user_id: userId,
-            leave_type_id: leaveType.leave_type_id,
-            cycle_start_date: cycleStartDate,
-            cycle_end_date: cycleEndDate,
-            allocated_balance:
-                leaveType.leave_allocation
-        });
+    } else if (
+        leaveType.allocation_frequency === "MONTHLY"
+    ) {
 
-        balance =
-            await leaveRepository.findLeaveBalance(
-                userId,
-                leaveType.leave_type_id,
-                requestDate
-            );
+        const year = date.getFullYear();
+        const month = date.getMonth();
+
+        const startDate = new Date(
+            year,
+            month,
+            1
+        );
+
+        const endDate = new Date(
+            year,
+            month + 1,
+            0
+        );
+
+        cycleStartDate =
+            startDate.toISOString().split("T")[0];
+
+        cycleEndDate =
+            endDate.toISOString().split("T")[0];
+
+    } else if (
+        leaveType.allocation_frequency === "ONE_TIME"
+    ) {
+
+        // One-time allocation
+        cycleStartDate =
+            date.toISOString().split("T")[0];
+
+        cycleEndDate =
+            date.toISOString().split("T")[0];
+
+    } else {
+
+        throw new Error(
+            "Invalid leave allocation frequency."
+        );
     }
+
+    await leaveRepository.createLeaveBalance({
+        user_id: userId,
+        leave_type_id:
+            leaveType.leave_type_id,
+        cycle_start_date: cycleStartDate,
+        cycle_end_date: cycleEndDate,
+        allocated_balance:
+            leaveType.leave_allocation
+    });
+
+    balance =
+        await leaveRepository.findLeaveBalance(
+            userId,
+            leaveType.leave_type_id,
+            requestDate
+        );
+}
 
     return balance;
 };

@@ -7,7 +7,9 @@ import leaveRoutes from "./modules/leave/leave.routes.js";
 import leaveTypeRoutes from "./modules/leaveTypes/leaveType.routes.js";
 import notificationRoutes from "./modules/notifications/notification.routes.js";
 import branchRoutes from "./modules/branch/branch.routes.js";
-
+import dashboardRoutes
+    from "./modules/dashboard/dashboard.routes.js";
+import userRoutes from "./modules/users/users.routes.js";
 const app = express();
 
 app.use(cors({
@@ -31,6 +33,15 @@ app.use(
 app.use(
     "/api/branches",
     branchRoutes
+);
+app.use(
+    "/api/dashboard",
+    dashboardRoutes
+);
+
+app.use(
+    "/api/users",
+    userRoutes
 );
 
 export default app;
