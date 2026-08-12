@@ -25,7 +25,7 @@ export const createBranch = async (data) => {
             state,
             country
         )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        VALUES ( ?, ?, ?, ?, ?, ?, ?, ?)
         `,
         [
             company_id,

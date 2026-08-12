@@ -387,8 +387,7 @@ export const resetPassword = async (data) => {
             };
         }
 
-        console.log("DB OTP:", user.otp_code, typeof user.otp_code);
-        console.log("BODY OTP:", otp, typeof otp);
+       
         
         // Verify OTP
         if (user.otp_code !== otp) {

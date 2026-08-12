@@ -27,7 +27,9 @@ export const findUserByEmail = async (email) => {
             email,
             role,
             status,
-            password_hash
+            password_hash,
+            otp_code,
+            otp_expires_at
         FROM users
         WHERE email = ?
         `,
