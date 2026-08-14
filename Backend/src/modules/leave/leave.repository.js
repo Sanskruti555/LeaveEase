@@ -228,7 +228,7 @@ export const approveLeaveRequest = async (
 
 export const rejectLeaveRequest = async (
     requestId,
-    managerId,
+   
     rejectionReason
 ) => {
 
@@ -237,14 +237,13 @@ export const rejectLeaveRequest = async (
         UPDATE leave_requests
         SET
             status = 'REJECTED',
-            approved_by = ?,
-            approved_at = CURRENT_TIMESTAMP,
-            rejection_reason = ?
-        WHERE request_id = ?
+            rejection_reason = ?,
+            approved_by = NULL,
+            approved_at = NULL
+            WHERE request_id = ?
           AND status = 'PENDING'
         `,
         [
-            managerId,
             rejectionReason,
             requestId
         ]

@@ -662,7 +662,6 @@ export const rejectLeave = async (
         const affectedRows =
             await leaveRepository.rejectLeaveRequest(
                 requestId,
-                user_id,
                 rejection_reason.trim()
             );
 
