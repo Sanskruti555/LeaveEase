@@ -10,6 +10,8 @@ import branchRoutes from "./modules/branch/branch.routes.js";
 import dashboardRoutes
     from "./modules/dashboard/dashboard.routes.js";
 import userRoutes from "./modules/users/users.routes.js";
+import { errorMiddleware } from "./middleware/error.middleware.js";
+
 const app = express();
 
 app.use(cors({
@@ -21,6 +23,7 @@ app.use(express.json());
 app.use("/api/invitations", invitationRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/leaves", leaveRoutes);
+app.use(errorMiddleware);
 app.use(
     "/api/leave-types",
     leaveTypeRoutes

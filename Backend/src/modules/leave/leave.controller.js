@@ -1,15 +1,19 @@
 import * as leaveService from "./leave.service.js";
-
+import { deleteFile } from "../../utils/file.utils.js";
 
 export const applyLeave = async (req, res) => {
 
     const result = await leaveService.applyLeave(
         req.user,
-        req.body
+        req.body,
+        req.file
     );
 
     if (result.success) {
         return res.status(201).json(result);
+    }
+    if (req.file) {
+        deleteFile(req.file.path);
     }
 
     return res.status(400).json(result);

@@ -1,4 +1,5 @@
 import Joi from "joi";
+import { deleteFile } from "../../utils/file.utils.js";
 
 const applyLeaveSchema = Joi.object({
 
@@ -38,14 +39,21 @@ export const validateApplyLeave = (req, res, next) => {
     );
 
     if (error) {
-        return res.status(400).json({
-            success: false,
-            message: "Validation failed.",
-            errors: error.details.map(
-                detail => detail.message
-            )
-        });
+
+    
+
+    if (req.file) {
+        deleteFile(req.file.path);
     }
+
+    return res.status(400).json({
+        success: false,
+        message: "Validation failed.",
+        errors: error.details.map(
+            detail => detail.message
+        )
+    });
+}
 
     next();
 };

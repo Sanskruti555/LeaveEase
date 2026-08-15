@@ -131,7 +131,7 @@ const calculateLeaveDays = (
     );
 };
 
-export const applyLeave = async (user, data) => {
+export const applyLeave = async (user, data , file) => {
 
     try {
 
@@ -286,7 +286,9 @@ if (overlappingLeave) {
                 end_date,
                 duration_type,
                 reason,
-                attachment_path: null
+                attachment_path: file
+                ? file.path
+                : null
             });
 
           const employeeManager =

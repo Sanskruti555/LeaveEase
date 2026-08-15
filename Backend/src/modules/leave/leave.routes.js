@@ -1,4 +1,5 @@
 import express from "express";
+import upload from "../../middleware/upload.middleware.js";
 
 import {
     applyLeave , getMyLeaves ,   getTeamLeaves ,  rejectLeave , approveLeave ,getLeaveBalances ,cancelLeave
@@ -20,6 +21,7 @@ router.post(
     "/",
     authMiddleware,
     validateApplyLeave,
+    upload.single("attachment"),
     applyLeave
 );
 
