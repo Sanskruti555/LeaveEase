@@ -1,20 +1,18 @@
-import { Routes, Route } from "react-router-dom";
-import AcceptInvitation from "./pages/AcceptInvitation";
-import Login from "./pages/Login";
+import React from "react";
+import { ToastProvider } from "./context/ToastContext";
+import { AuthProvider } from "./context/AuthContext";
+import { NotificationProvider } from "./context/NotificationContext";
+import { AppRoutes } from "./routes/AppRoutes";
 
 function App() {
     return (
-        <Routes>
-
-            <Route
-                path="/login"
-                element={<Login />}
-            />
-            <Route
-                path="/accept-invitation/:token"
-                element={<AcceptInvitation />}
-            />
-        </Routes>
+        <ToastProvider>
+            <AuthProvider>
+                <NotificationProvider>
+                    <AppRoutes />
+                </NotificationProvider>
+            </AuthProvider>
+        </ToastProvider>
     );
 }
 
