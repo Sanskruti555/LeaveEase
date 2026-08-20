@@ -320,135 +320,163 @@ export const TeamLeaveRequests = () => {
             </Card>
 
             {/* Detail View Modal */}
-            {selectedDetail && (
-                <Modal
-                    isOpen={!!selectedDetail}
-                    onClose={() => setSelectedDetail(null)}
-                    title="Leave Request Overview"
-                    maxWidth="520px"
-                    footer={
-                        <>
-                            {selectedDetail.status === "PENDING" && (
-                                <>
-                                    <Button
-                                        variant="danger"
-                                        onClick={() => {
-                                            setRequestToReject(selectedDetail);
-                                            setSelectedDetail(null);
-                                        }}
-                                    >
-                                        Reject Request
-                                    </Button>
-                                    <Button
-                                        variant="success"
-                                        onClick={() => {
-                                            setRequestToApprove(selectedDetail);
-                                            setSelectedDetail(null);
-                                        }}
-                                    >
-                                        Approve Request
-                                    </Button>
-                                </>
-                            )}
-                            <Button variant="outline" onClick={() => setSelectedDetail(null)}>
-                                Close
-                            </Button>
-                        </>
-                    }
-                >
-                    <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-                        <div
-                            style={{
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "space-between",
-                                padding: "0.875rem 1rem",
-                                backgroundColor: "var(--gray-50)",
-                                borderRadius: "var(--radius-md)"
+{selectedDetail && (
+    <Modal
+        isOpen={!!selectedDetail}
+        onClose={() => setSelectedDetail(null)}
+        title="Leave Request Overview"
+        maxWidth="520px"
+        footer={
+            <>
+                {selectedDetail.status === "PENDING" && (
+                    <>
+                        <Button
+                            variant="danger"
+                            onClick={() => {
+                                setRequestToReject(selectedDetail);
+                                setSelectedDetail(null);
                             }}
                         >
-                            <div>
-                                <h4 style={{ fontSize: "1.0625rem", fontWeight: 800, color: "var(--gray-900)" }}>
-                                    {selectedDetail.employee_name}
-                                </h4>
-                                <span style={{ fontSize: "0.75rem", color: "var(--gray-500)" }}>
-                                    {selectedDetail.employee_email}
-                                </span>
-                            </div>
-                            <Badge status={selectedDetail.status}>{selectedDetail.status}</Badge>
-                        </div>
+                            Reject Request
+                        </Button>
+                        <Button
+                            variant="success"
+                            onClick={() => {
+                                setRequestToApprove(selectedDetail);
+                                setSelectedDetail(null);
+                            }}
+                        >
+                            Approve Request
+                        </Button>
+                    </>
+                )}
+                <Button variant="outline" onClick={() => setSelectedDetail(null)}>
+                    Close
+                </Button>
+            </>
+        }
+    >
+        <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+            <div
+                style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    padding: "0.875rem 1rem",
+                    backgroundColor: "var(--gray-50)",
+                    borderRadius: "var(--radius-md)"
+                }}
+            >
+                <div>
+                    <h4 style={{ fontSize: "1.0625rem", fontWeight: 800, color: "var(--gray-900)" }}>
+                        {selectedDetail.employee_name}
+                    </h4>
+                    <span style={{ fontSize: "0.75rem", color: "var(--gray-500)" }}>
+                        {selectedDetail.employee_email}
+                    </span>
+                </div>
+                <Badge status={selectedDetail.status}>{selectedDetail.status}</Badge>
+            </div>
 
-                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
-                            <div>
-                                <span style={{ fontSize: "0.75rem", color: "var(--gray-500)", fontWeight: 600 }}>
-                                    Leave Type:
-                                </span>
-                                <p style={{ fontSize: "0.875rem", fontWeight: 700, color: "var(--primary-700)", marginTop: "0.125rem" }}>
-                                    {selectedDetail.leave_type}
-                                </p>
-                            </div>
-                            <div>
-                                <span style={{ fontSize: "0.75rem", color: "var(--gray-500)", fontWeight: 600 }}>
-                                    Duration:
-                                </span>
-                                <p style={{ fontSize: "0.875rem", fontWeight: 600, color: "var(--gray-900)", marginTop: "0.125rem" }}>
-                                    {selectedDetail.duration_type === "HALF_DAY" ? "Half Day (0.5d)" : "Full Day"}
-                                </p>
-                            </div>
-                        </div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
+                <div>
+                    <span style={{ fontSize: "0.75rem", color: "var(--gray-500)", fontWeight: 600 }}>
+                        Leave Type:
+                    </span>
+                    <p style={{ fontSize: "0.875rem", fontWeight: 700, color: "var(--primary-700)", marginTop: "0.125rem" }}>
+                        {selectedDetail.leave_type}
+                    </p>
+                </div>
+                <div>
+                    <span style={{ fontSize: "0.75rem", color: "var(--gray-500)", fontWeight: 600 }}>
+                        Duration:
+                    </span>
+                    <p style={{ fontSize: "0.875rem", fontWeight: 600, color: "var(--gray-900)", marginTop: "0.125rem" }}>
+                        {selectedDetail.duration_type === "HALF_DAY" ? "Half Day (0.5d)" : "Full Day"}
+                    </p>
+                </div>
+            </div>
 
-                        <div>
-                            <span style={{ fontSize: "0.75rem", color: "var(--gray-500)", fontWeight: 600 }}>
-                                Date Range:
-                            </span>
-                            <p style={{ fontSize: "0.875rem", fontWeight: 600, color: "var(--gray-900)", marginTop: "0.125rem" }}>
-                                {formatDate(selectedDetail.start_date)} — {formatDate(selectedDetail.end_date)}
-                            </p>
-                        </div>
+            <div>
+                <span style={{ fontSize: "0.75rem", color: "var(--gray-500)", fontWeight: 600 }}>
+                    Date Range:
+                </span>
+                <p style={{ fontSize: "0.875rem", fontWeight: 600, color: "var(--gray-900)", marginTop: "0.125rem" }}>
+                    {formatDate(selectedDetail.start_date)} — {formatDate(selectedDetail.end_date)}
+                </p>
+            </div>
 
-                        <div>
-                            <span style={{ fontSize: "0.75rem", color: "var(--gray-500)", fontWeight: 600 }}>
-                                Employee Reason:
-                            </span>
-                            <p
-                                style={{
-                                    fontSize: "0.875rem",
-                                    color: "var(--gray-800)",
-                                    marginTop: "0.25rem",
-                                    padding: "0.75rem",
-                                    backgroundColor: "var(--gray-50)",
-                                    borderRadius: "var(--radius-md)",
-                                    lineHeight: 1.5
-                                }}
-                            >
-                                {selectedDetail.reason}
-                            </p>
-                        </div>
+            <div>
+                <span style={{ fontSize: "0.75rem", color: "var(--gray-500)", fontWeight: 600 }}>
+                    Employee Reason:
+                </span>
+                <p
+                    style={{
+                        fontSize: "0.875rem",
+                        color: "var(--gray-800)",
+                        marginTop: "0.25rem",
+                        padding: "0.75rem",
+                        backgroundColor: "var(--gray-50)",
+                        borderRadius: "var(--radius-md)",
+                        lineHeight: 1.5
+                    }}
+                >
+                    {selectedDetail.reason}
+                </p>
+            </div>
 
-                        {selectedDetail.status === "REJECTED" && selectedDetail.rejection_reason && (
-                            <div
-                                style={{
-                                    padding: "0.875rem",
-                                    backgroundColor: "var(--danger-50)",
-                                    border: "1px solid var(--danger-100)",
-                                    borderRadius: "var(--radius-md)"
-                                }}
-                            >
-                                <span style={{ fontSize: "0.75rem", color: "var(--danger-700)", fontWeight: 700 }}>
-                                    Rejection Reason:
-                                </span>
-                                <p style={{ fontSize: "0.875rem", color: "var(--danger-800)", marginTop: "0.25rem" }}>
-                                    {selectedDetail.rejection_reason}
-                                </p>
-                            </div>
-                        )}
 
-                        <div style={{ fontSize: "0.75rem", color: "var(--gray-400)" }}>
-                            Submitted on {formatDateTime(selectedDetail.created_at)}
-                        </div>
-                    </div>
-                </Modal>
+     {selectedDetail.attachment_path && (
+    <div>
+        <span style={{ fontSize: "0.75rem", color: "var(--gray-500)", fontWeight: 600 }}>
+            Supporting Document / Attachment:
+        </span>
+        <div style={{ marginTop: "0.375rem" }}>
+            <a
+                href={`${(import.meta.env.VITE_API_BASE_URL || "http://localhost:5000").replace(/\/api\/?$/, "")}/${selectedDetail.attachment_path.replace(/\\/g, "/")}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "0.5rem",
+                    fontSize: "0.875rem",
+                    fontWeight: 600,
+                    color: "var(--primary-700)",
+                    textDecoration: "underline"
+                }}
+            >
+                📎 View / Download Attachment
+            </a>
+        </div>
+    </div>
+)}
+
+
+            {selectedDetail.status === "REJECTED" && selectedDetail.rejection_reason && (
+                <div
+                    style={{
+                        padding: "0.875rem",
+                        backgroundColor: "var(--danger-50)",
+                        border: "1px solid var(--danger-100)",
+                        borderRadius: "var(--radius-md)"
+                    }}
+                >
+                    <span style={{ fontSize: "0.75rem", color: "var(--danger-700)", fontWeight: 700 }}>
+                        Rejection Reason:
+                    </span>
+                    <p style={{ fontSize: "0.875rem", color: "var(--danger-800)", marginTop: "0.25rem" }}>
+                        {selectedDetail.rejection_reason}
+                    </p>
+                </div>
             )}
+
+            <div style={{ fontSize: "0.75rem", color: "var(--gray-400)" }}>
+                Submitted on {formatDateTime(selectedDetail.created_at)}
+            </div>
+        </div>
+    </Modal>
+)}
 
             {/* Approve Confirmation Dialog */}
             <ConfirmDialog

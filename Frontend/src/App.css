@@ -1,0 +1,28 @@
+/* =========================================
+   Global Glassmorphic Theme Overrides
+   ========================================= */
+
+/* Soft background gradient for the whole dashboard layout */
+body, .app-layout, div[class*="sidebar-layout"] {
+    background: linear-gradient(135deg, #d8f3dc 0%, #b7e4c7 50%, #95d5b2 100%) !important;
+    min-height: 100vh;
+}
+
+/* Glassmorphic Card Styling (Matches your login card) */
+.card, div[class*="Card"] {
+    background: rgba(255, 255, 255, 0.45) !important;
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.6) !important;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.8) !important;
+    border-radius: 1.5rem !important; /* Matches your login card's smooth curved corners */
+}
+
+/* Glassmorphic Sidebar Styling */
+aside.sidebar {
+    background: rgba(255, 255, 255, 0.55) !important;
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
+    border-right: 1px solid rgba(255, 255, 255, 0.6) !important;
+    box-shadow: 10px 0 30px rgba(0, 0, 0, 0.03) !important;
+}

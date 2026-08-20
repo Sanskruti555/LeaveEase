@@ -125,8 +125,8 @@ export const Header = ({
                         </div>
 
                         <div
-                            style={{ textAlign: "left", display: "none" }}
-                            className="user-text-info" // Un-hidden by desktop media layout targets
+                            style={{ textAlign: "left" }}
+                            className="user-text-info"
                         >
                             <span
                                 style={{

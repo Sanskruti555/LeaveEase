@@ -11,6 +11,11 @@ import dashboardRoutes
     from "./modules/dashboard/dashboard.routes.js";
 import userRoutes from "./modules/users/users.routes.js";
 import { errorMiddleware } from "./middleware/error.middleware.js";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 
@@ -46,5 +51,6 @@ app.use(
     "/api/users",
     userRoutes
 );
+app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 
 export default app;

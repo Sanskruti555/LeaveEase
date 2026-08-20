@@ -10,7 +10,6 @@ import { AppLayout } from "../layouts/AppLayout";
 import { ProtectedRoute } from "./ProtectedRoute";
 import { RoleRoute } from "./RoleRoute";
 
-
 // Auth Pages
 import { Login } from "../pages/auth/Login";
 import { RegisterCompany } from "../pages/auth/RegisterCompany";
@@ -90,9 +89,11 @@ export const AppRoutes = () => {
             {/* Root Dispatcher */}
             <Route path="/" element={<RootRedirect />} />
 
+            <Route path="/login" element={<Login />} />
+
             {/* Public Authentication Pages */}
             <Route element={<AuthLayout />}>
-                <Route path="/login" element={<Login />} />
+                
                 <Route path="/register" element={<RegisterCompany />} />
                 <Route path="/verify-otp" element={<VerifyOtp />} />
                 <Route path="/forgot-password" element={<ForgotPassword />} />

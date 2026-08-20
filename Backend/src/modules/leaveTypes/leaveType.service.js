@@ -61,6 +61,7 @@ export const createLeaveType = async (
             "QUARTERLY",
             "HALF_YEARLY",
             "YEARLY",
+            "ONE_TIME",
             "ONCE"
         ];
 
@@ -257,6 +258,7 @@ export const updateLeaveType = async (
             "QUARTERLY",
             "HALF_YEARLY",
             "YEARLY",
+            "ONE_TIME",
             "ONCE"
         ];
 

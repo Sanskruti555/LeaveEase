@@ -63,7 +63,48 @@ const getOrCreateLeaveBalance = async (
             endDate.toISOString().split("T")[0];
 
     } else if (
-        leaveType.allocation_frequency === "ONE_TIME"
+        leaveType.allocation_frequency === "QUARTERLY"
+    ) {
+
+        const year = date.getFullYear();
+        const quarter = Math.floor(date.getMonth() / 3);
+
+        const startDate = new Date(
+            year,
+            quarter * 3,
+            1
+        );
+
+        const endDate = new Date(
+            year,
+            (quarter + 1) * 3,
+            0
+        );
+
+        cycleStartDate =
+            startDate.toISOString().split("T")[0];
+
+        cycleEndDate =
+            endDate.toISOString().split("T")[0];
+
+    } else if (
+        leaveType.allocation_frequency === "HALF_YEARLY"
+    ) {
+
+        const year = date.getFullYear();
+        const half = date.getMonth() < 6 ? 0 : 1;
+
+        if (half === 0) {
+            cycleStartDate = `${year}-01-01`;
+            cycleEndDate = `${year}-06-30`;
+        } else {
+            cycleStartDate = `${year}-07-01`;
+            cycleEndDate = `${year}-12-31`;
+        }
+
+    } else if (
+        leaveType.allocation_frequency === "ONE_TIME" ||
+        leaveType.allocation_frequency === "ONCE"
     ) {
 
         // One-time allocation
@@ -181,6 +222,14 @@ export const applyLeave = async (user, data , file) => {
             return {
                 success: false,
                 message: "This leave type is currently inactive."
+            };
+        }
+
+        // Supporting document check
+        if (leaveType.requires_attachment && !file) {
+            return {
+                success: false,
+                message: "Supporting document is required for this leave type."
             };
         }
 

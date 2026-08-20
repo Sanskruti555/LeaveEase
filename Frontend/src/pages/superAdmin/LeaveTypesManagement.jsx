@@ -343,7 +343,7 @@ export const LeaveTypesManagement = () => {
                             <option value="MONTHLY">Monthly</option>
                             <option value="QUARTERLY">Quarterly</option>
                             <option value="HALF_YEARLY">Half-Yearly</option>
-                            <option value="ONCE">Once (One-time)</option>
+                            <option value="ONE_TIME">Once (One-time)</option>
                         </Select>
                     </div>
 

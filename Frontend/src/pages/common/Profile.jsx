@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { User, Phone, Mail, Lock, Shield, Calendar, Building2, Eye, EyeOff, Save, CheckCircle2, AlertCircle } from "lucide-react";
+import { User, Phone, Mail, Lock, Shield, Calendar, Building2, Eye, EyeOff, Save, CheckCircle2, AlertCircle, ShieldCheck, Key } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import { useToast } from "../../context/ToastContext";
 import { authApi } from "../../api/auth.api";
@@ -255,15 +255,25 @@ export const Profile = () => {
                                 required
                             />
 
-                            <Input
-                                label="Phone Number"
-                                name="phone"
-                                type="tel"
-                                placeholder="+1 555 123 4567"
-                                value={profileData.phone}
-                                onChange={(e) => setFormData((prev) => ({ ...prev, phone: e.target.value }))}
-                                leftIcon={<Phone size={18} />}
-                            />
+                           <Input
+                               label="Phone Number"
+                               name="phone"
+                               type="tel"
+                               placeholder="e.g. 9876543210"
+                               value={profileData.phone}
+                               onChange={(e) => {
+                               // 1. Strip out any character that is NOT a number
+                               const numericValue = e.target.value.replace(/\D/g, "");
+        
+                               // 2. Only update the state if the length is 10 or less
+                               if (numericValue.length <= 10) {
+                               setFormData((prev) => ({ ...prev, phone: numericValue }));
+                               }
+                              }}
+                               leftIcon={<Phone size={18} />}
+                               maxLength={10} 
+                               helperText="Must be exactly 10 digits"
+                              />
                         </div>
 
                         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: "1.25rem" }}>
@@ -304,6 +314,26 @@ export const Profile = () => {
                     subtitle="Ensure your account is using a long, random password to stay secure"
                     className="animate-fade-in"
                 >
+                    {/* NEW: Last Changed Status Banner */}
+                    <div
+                        style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "0.75rem",
+                            padding: "1rem",
+                            backgroundColor: "var(--success-50, #ecfdf5)",
+                            border: "1px solid var(--success-100, #d1fae5)",
+                            borderRadius: "var(--radius-md, 8px)",
+                            color: "var(--success-700, #047857)",
+                            marginBottom: "1.5rem"
+                        }}
+                    >
+                        <ShieldCheck size={20} />
+                        <span style={{ fontSize: "0.875rem", fontWeight: 500 }}>
+                            Your password is secure. Last changed on <strong>{user?.password_updated_at ? formatDateTime(user.password_updated_at) : 'recently'}</strong>.
+                        </span>
+                    </div>
+
                     {passwordError && (
                         <div
                             style={{
@@ -325,35 +355,39 @@ export const Profile = () => {
                     )}
 
                     <form onSubmit={handlePasswordSubmit} style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
-                        <Input
-                            label="Current Password"
-                            type={showCurrentPass ? "text" : "password"}
-                            placeholder="••••••••"
-                            value={passwordData.current_password}
-                            onChange={(e) =>
-                                setPasswordData((prev) => ({ ...prev, current_password: e.target.value }))
-                            }
-                            leftIcon={<Lock size={18} />}
-                            rightIcon={
-                                <button
-                                    type="button"
-                                    onClick={() => setShowCurrentPass(!showCurrentPass)}
-                                    style={{
-                                        background: "none",
-                                        border: "none",
-                                        cursor: "pointer",
-                                        color: "var(--gray-400)",
-                                        display: "flex",
-                                        alignItems: "center"
-                                    }}
-                                >
-                                    {showCurrentPass ? <EyeOff size={18} /> : <Eye size={18} />}
-                                </button>
-                            }
-                            required
-                        />
+                        <div style={{ maxWidth: "400px" }}>
+                            <Input
+                                label="Current Password"
+                                type={showCurrentPass ? "text" : "password"}
+                                placeholder="••••••••"
+                                value={passwordData.current_password}
+                                onChange={(e) =>
+                                    setPasswordData((prev) => ({ ...prev, current_password: e.target.value }))
+                                }
+                                leftIcon={<Lock size={18} />}
+                                rightIcon={
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowCurrentPass(!showCurrentPass)}
+                                        style={{
+                                            background: "none",
+                                            border: "none",
+                                            cursor: "pointer",
+                                            color: "var(--gray-400)",
+                                            display: "flex",
+                                            alignItems: "center"
+                                        }}
+                                    >
+                                        {showCurrentPass ? <EyeOff size={18} /> : <Eye size={18} />}
+                                    </button>
+                                }
+                                required
+                            />
+                        </div>
 
-                        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: "1.25rem" }}>
+                        <div style={{ height: "1px", backgroundColor: "var(--border-color)", margin: "0.5rem 0", maxWidth: "600px" }} />
+
+                        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: "1.25rem", maxWidth: "600px" }}>
                             <Input
                                 label="New Password"
                                 type={showNewPass ? "text" : "password"}
@@ -396,12 +430,12 @@ export const Profile = () => {
                             />
                         </div>
 
-                        <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "0.5rem" }}>
+                        <div style={{ display: "flex", justifyContent: "flex-start", marginTop: "0.5rem" }}>
                             <Button
                                 type="submit"
                                 variant="primary"
                                 loading={passwordLoading}
-                                leftIcon={<KeyRound size={16} />}
+                                leftIcon={<Key size={16} />} 
                             >
                                 Update Password
                             </Button>

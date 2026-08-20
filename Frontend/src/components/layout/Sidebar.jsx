@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { NavLink } from "react-router-dom";
 import {
     LayoutDashboard,
@@ -12,9 +12,10 @@ import {
     CalendarPlus,
     Calendar,
     PieChart,
-    LogOut,
     Sparkles,
-    X
+    ChevronLeft,
+    ChevronRight,
+    LogOut
 } from "lucide-react";
 
 import { useAuth } from "../../context/AuthContext";
@@ -26,6 +27,7 @@ export const Sidebar = ({
     onLogoutRequest
 }) => {
     const { user, role } = useAuth();
+    const [isCollapsed, setIsCollapsed] = useState(false);
 
     const getNavItems = () => {
         switch (role) {
@@ -79,84 +81,89 @@ export const Sidebar = ({
                     style={{
                         position: "fixed",
                         inset: 0,
-                        backgroundColor: "rgba(15, 23, 42, 0.5)",
+                        backgroundColor: "rgba(15, 23, 42, 0.4)",
                         zIndex: 49,
                         backdropFilter: "blur(2px)"
                     }}
                 />
             )}
 
-            {/* Sidebar Container */}
+            {/* Glassmorphic Sidebar Container */}
             <aside
                 className={`sidebar ${isMobileOpen ? "mobile-open" : ""}`}
                 style={{
-                    width: "260px",
-                    backgroundColor: "#ffffff",
-                    borderRight: "1px solid var(--border-color, #e2e8f0)",
+                    width: isCollapsed ? "80px" : "260px",
+                    background: "rgba(255, 255, 255, 0.45)",
+                    backdropFilter: "blur(20px)",
+                    WebkitBackdropFilter: "blur(20px)",
+                    borderRight: "1px solid rgba(255, 255, 255, 0.6)",
+                    boxShadow: "20px 0 40px rgba(0, 0, 0, 0.04), inset -1px 0 0 rgba(255, 255, 255, 0.8)",
                     display: "flex",
                     flexDirection: "column",
                     position: "sticky",
                     top: 0,
                     height: "100vh",
                     zIndex: 50,
-                    transition: "transform 0.25s ease-in-out"
+                    transition: "width 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), transform 0.25s ease-in-out",
+                    color: "var(--gray-900, #0f172a)"
                 }}
             >
                 {/* Brand Logo Section */}
                 <div
                     style={{
                         height: "64px",
-                        padding: "0 1.25rem",
+                        padding: "0 1rem",
                         display: "flex",
                         alignItems: "center",
-                        justifyContent: "space-between",
-                        borderBottom: "1px solid var(--border-color, #e2e8f0)"
+                        justifyContent: isCollapsed ? "center" : "space-between",
+                        borderBottom: "1px solid rgba(255, 255, 255, 0.4)"
                     }}
                 >
-                    <div style={{ display: "flex", alignItems: "center", gap: "0.625rem" }}>
-                        <div
-                            style={{
-                                width: "34px",
-                                height: "34px",
-                                borderRadius: "var(--radius-md, 8px)",
-                                backgroundColor: "var(--primary-600, #4f46e5)",
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                color: "#ffffff",
-                                boxShadow: "0 2px 4px rgba(79, 70, 229, 0.3)"
-                            }}
-                        >
-                            <Sparkles size={18} />
-                        </div>
-                        <div>
+                    {!isCollapsed ? (
+                        <div style={{ display: "flex", alignItems: "center", gap: "0.625rem" }}>
+                            <div
+                                style={{
+                                    width: "34px",
+                                    height: "34px",
+                                    borderRadius: "8px",
+                                    backgroundColor: "#2d6a4f",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    color: "#ffffff",
+                                    boxShadow: "0 2px 4px rgba(45, 106, 79, 0.3)"
+                                }}
+                            >
+                                <Sparkles size={18} />
+                            </div>
                             <span
                                 style={{
                                     fontSize: "1.125rem",
                                     fontWeight: 800,
-                                    fontFamily: "var(--font-heading)",
                                     color: "var(--gray-900, #0f172a)",
                                     letterSpacing: "-0.02em"
                                 }}
                             >
-                                LeaveHub
+                                LeaveEase
                             </span>
                         </div>
-                    </div>
+                    ) : (
+                        <Sparkles size={20} color="#2d6a4f" />
+                    )}
 
-                    {/* Mobile Close Button */}
+                    {/* Desktop Collapse Toggle */}
                     <button
-                        onClick={onCloseMobile}
-                        className="mobile-close-btn"
+                        onClick={() => setIsCollapsed(!isCollapsed)}
                         style={{
                             background: "none",
                             border: "none",
-                            padding: "4px",
                             cursor: "pointer",
-                            color: "var(--gray-500, #64748b)"
+                            color: "var(--gray-600, #475569)",
+                            display: "flex",
+                            alignItems: "center"
                         }}
                     >
-                        <X size={18} />
+                        {isCollapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
                     </button>
                 </div>
 
@@ -175,23 +182,27 @@ export const Sidebar = ({
                         <NavLink
                             key={index}
                             to={item.to}
-                            onClick={onCloseMobile} // Auto-close drawer layouts on mobile screen links
+                            onClick={onCloseMobile}
+                            title={isCollapsed ? item.label : ""}
                             className={({ isActive }) => `nav-link ${isActive ? "active" : ""}`}
-                            style={{
+                            style={({ isActive }) => ({
                                 display: "flex",
                                 alignItems: "center",
                                 gap: "0.75rem",
                                 padding: "0.75rem 1rem",
-                                borderRadius: "var(--radius-md, 8px)",
+                                borderRadius: "10px",
                                 fontSize: "0.925rem",
-                                fontWeight: 500,
+                                fontWeight: isActive ? 700 : 500,
                                 textDecoration: "none",
-                                color: "var(--gray-600, #475569)",
-                                transition: "all 0.2s ease"
-                            }}
+                                color: isActive ? "#1b4332" : "var(--gray-700, #334155)",
+                                backgroundColor: isActive ? "rgba(255, 255, 255, 0.85)" : "transparent",
+                                boxShadow: isActive ? "0 4px 15px rgba(0, 0, 0, 0.05)" : "none",
+                                transition: "all 0.2s ease",
+                                justifyContent: isCollapsed ? "center" : "flex-start"
+                            })}
                         >
-                            {item.icon}
-                            <span>{item.label}</span>
+                            <span style={{ display: "flex", alignItems: "center" }}>{item.icon}</span>
+                            {!isCollapsed && <span style={{ whiteSpace: "nowrap" }}>{item.label}</span>}
                         </NavLink>
                     ))}
                 </nav>
@@ -200,19 +211,22 @@ export const Sidebar = ({
                 <div
                     style={{
                         padding: "1rem 0.75rem",
-                        borderTop: "1px solid var(--border-color, #e2e8f0)",
+                        borderTop: "1px solid rgba(255, 255, 255, 0.4)",
                         display: "flex",
                         flexDirection: "column",
                         gap: "0.75rem"
                     }}
                 >
-                    {user && (
+                    {user && !isCollapsed && (
                         <div
                             style={{
                                 display: "flex",
                                 alignItems: "center",
                                 gap: "0.75rem",
-                                padding: "0.5rem 0.75rem"
+                                padding: "0.5rem 0.75rem",
+                                backgroundColor: "rgba(255, 255, 255, 0.3)",
+                                borderRadius: "10px",
+                                border: "1px solid rgba(255, 255, 255, 0.5)"
                             }}
                         >
                             <div
@@ -220,12 +234,12 @@ export const Sidebar = ({
                                     width: "36px",
                                     height: "36px",
                                     borderRadius: "50%",
-                                    backgroundColor: "var(--gray-100, #f1f5f9)",
+                                    backgroundColor: "#2d6a4f",
                                     display: "flex",
                                     alignItems: "center",
                                     justifyContent: "center",
                                     fontWeight: 600,
-                                    color: "var(--primary-600, #4f46e5)"
+                                    color: "#ffffff"
                                 }}
                             >
                                 {user.name ? user.name.charAt(0).toUpperCase() : "U"}
@@ -245,7 +259,7 @@ export const Sidebar = ({
                                 <div
                                     style={{
                                         fontSize: "0.75rem",
-                                        color: "var(--gray-500, #64748b)"
+                                        color: "var(--gray-600, #475569)"
                                     }}
                                 >
                                     {formatRole(role)}
@@ -253,26 +267,29 @@ export const Sidebar = ({
                             </div>
                         </div>
                     )}
+
                     <button
                         onClick={onLogoutRequest}
+                        title={isCollapsed ? "Logout" : ""}
                         style={{
                             width: "100%",
                             display: "flex",
                             alignItems: "center",
+                            justifyContent: isCollapsed ? "center" : "flex-start",
                             gap: "0.75rem",
                             padding: "0.75rem 1rem",
-                            borderRadius: "var(--radius-md, 8px)",
+                            borderRadius: "10px",
                             fontSize: "0.925rem",
                             fontWeight: 500,
                             border: "none",
                             background: "none",
                             color: "var(--danger-600, #dc2626)",
                             cursor: "pointer",
-                            textAlign: "left",
                             transition: "background 0.2s ease"
                         }}
                     >
-                        Logout
+                        <LogOut size={18} />
+                        {!isCollapsed && <span>Logout</span>}
                     </button>
                 </div>
             </aside>

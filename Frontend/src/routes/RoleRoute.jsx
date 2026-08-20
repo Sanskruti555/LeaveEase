@@ -4,7 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import { Loader2 } from "lucide-react";
 
 export const RoleRoute = ({ allowedRoles = [], children }) => {
-    const { user, isAuthenticated, loading, role } = useAuth();
+    const { isAuthenticated, loading, role } = useAuth();
 
     if (loading) {
         return (

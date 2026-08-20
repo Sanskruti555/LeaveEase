@@ -166,7 +166,7 @@ CREATE TABLE leave_types (
     name VARCHAR(100) NOT NULL,
     description TEXT,
     leave_allocation DECIMAL(5,2) NOT NULL,
-    allocation_frequency ENUM('MONTHLY','YEARLY','ONE_TIME') NOT NULL,
+    allocation_frequency ENUM('MONTHLY','QUARTERLY','HALF_YEARLY','YEARLY','ONE_TIME','ONCE') NOT NULL,
     is_paid BOOLEAN DEFAULT TRUE,
     requires_attachment BOOLEAN DEFAULT FALSE,
     manager_approval_required BOOLEAN DEFAULT TRUE,

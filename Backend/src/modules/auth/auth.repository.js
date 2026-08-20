@@ -221,6 +221,7 @@ export const findUserById = async (user_id) => {
             company_id,
             name,
             email,
+            phone,
             password_hash,
             role
         FROM users
