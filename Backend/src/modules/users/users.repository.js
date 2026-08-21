@@ -30,8 +30,10 @@ export const findUsersByCompany = async (
             u.is_email_verified,
             u.last_login,
             u.created_at,
-            u.updated_at
+            u.updated_at,
+            b.name AS branch_name
         FROM users u
+        LEFT JOIN branches b ON u.branch_id = b.branch_id
         WHERE u.company_id = ?
     `;
 
@@ -82,7 +84,10 @@ export const findUsersByCompany = async (
         params
     );
 
-    return rows;
+    return rows.map(user => ({
+        ...user,
+        branch: user.branch_name || 'Unassigned'
+    }));
 };
 
 

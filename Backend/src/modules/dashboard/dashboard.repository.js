@@ -539,3 +539,27 @@ export const getEmployeeRecentLeaves = async (userId) => {
 
     return rows;
 };
+
+export const getCompanyUsersWithBranches = async (companyId) => {
+    const [rows] = await pool.execute(
+        `
+        SELECT 
+            u.user_id,
+            u.company_id,
+            u.branch_id,
+            u.name,
+            u.email,
+            u.role,
+            u.status,
+            u.created_at,
+            b.name AS branch_name
+        FROM users u
+        LEFT JOIN branches b ON u.branch_id = b.branch_id
+        WHERE u.company_id = ?
+        ORDER BY u.created_at DESC
+        `,
+        [companyId]
+    );
+
+    return rows;
+};
