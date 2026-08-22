@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import rateLimit from "express-rate-limit"; // 1. Import rate-limit
+import helmet from "helmet";
 
 import authRoutes from "./modules/auth/auth.routes.js";
 import invitationRoutes from "./modules/invitations/invitation.routes.js";
@@ -18,6 +19,8 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
+
+app.use(helmet());
 
 app.use(cors({
     origin: ["http://localhost:5173", "http://localhost:3000", "http://localhost:3001"],
